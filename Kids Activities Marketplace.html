@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Activities Marketplace</title>
+    <style>
+        :root {
+            --color-primary: #2180a0;
+            --color-primary-hover: #1d7487;
+            --color-secondary: #f5f5f5;
+            --color-text: #333;
+            --color-text-light: #666;
+            --color-border: #e0e0e0;
+            --color-success: #22c55e;
+            --color-warning: #f97316;
+            --color-error: #ef4444;
+            --spacing-xs: 8px;
+            --spacing-sm: 12px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f9f9f9;
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: white;
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--spacing-md);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .user-toggle {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .tab-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--color-border);
+            background: white;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background: rgba(33, 128, 160, 0.05);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+        }
+
+        .tabs-content {
+            display: none;
+        }
+
+        .tabs-content.active {
+            display: block;
+        }
+
+        /* Parent Tab Styles */
+        .search-filters {
+            background: white;
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: var(--spacing-sm);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(33, 128, 160, 0.1);
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .activity-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.2s;
+            cursor: pointer;
+        }
+
+        .activity-card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+
+        .card-content {
+            padding: var(--spacing-md);
+        }
+
+        .card-category {
+            display: inline-block;
+            background: rgba(33, 128, 160, 0.1);
+            color: var(--color-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .card-provider {
+            font-size: 13px;
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .card-location {
+            font-size: 13px;
+            color: var(--color-text-light);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .card-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .card-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: #f0f0f0;
+        }
+
+        /* Provider Tab Styles */
+        .provider-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: var(--spacing-lg);
+        }
+
+        .sidebar {
+            background: white;
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--spacing-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-item {
+            padding: var(--spacing-xs) 0;
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--color-text-light);
+            transition: color 0.2s;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        .main-panel {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-text);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(33, 128, 160, 0.1), rgba(33, 128, 160, 0.05));
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--color-text-light);
+            margin-top: var(--spacing-xs);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .pricing-section {
+            background: rgba(33, 128, 160, 0.05);
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .pricing-tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .tier-card {
+            background: white;
+            padding: var(--spacing-md);
+            border: 2px solid var(--color-border);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .tier-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .tier-price {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .tier-features {
+            font-size: 12px;
+            color: var(--color-text-light);
+            text-align: left;
+            line-height: 1.8;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .bookings-table th {
+            background: var(--color-secondary);
+            padding: var(--spacing-sm);
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .bookings-table td {
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--color-success);
+        }
+
+        .status-pending {
+            background: rgba(249, 115, 34, 0.1);
+            color: var(--color-warning);
+        }
+
+        .messaging-box {
+            background: var(--color-secondary);
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .message-preview {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .message-preview:hover {
+            background: white;
+        }
+
+        .message-preview:last-child {
+            border-bottom: none;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .message-text {
+            font-size: 13px;
+            color: var(--color-text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 768px) {
+            .provider-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .activities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: var(--spacing-md);
+            }
+
+            .user-toggle {
+                width: 100%;
+            }
+
+            .tab-button {
+                flex: 1;
+            }
+
+            .pricing-tiers {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">🎓 Kids Activities</div>
+            <div class="user-toggle">
+                <button class="tab-button active" onclick="switchView('parent')">👨‍👩‍👧 Parent</button>
+                <button class="tab-button" onclick="switchView('provider')">🏢 Provider</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- PARENT VIEW -->
+        <div id="parent" class="tabs-content active">
+            <div class="search-filters">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label class="filter-label">Search</label>
+                        <input type="text" id="searchInput" placeholder="Activity name...">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Category</label>
+                        <select id="categorySelect" onchange="filterActivities()">
+                            <option value="">All Categories</option>
+                            <option value="sports">Sports</option>
+                            <option value="arts">Arts & Crafts</option>
+                            <option value="music">Music</option>
+                            <option value="dance">Dance & Movement</option>
+                            <option value="academic">Academic & Tutoring</option>
+                            <option value="enrichment">Enrichment</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Age Group</label>
+                        <select id="ageSelect" onchange="filterActivities()">
+                            <option value="">All Ages</option>
+                            <option value="3-6">3-6 years</option>
+                            <option value="7-10">7-10 years</option>
+                            <option value="11-14">11-14 years</option>
+                            <option value="15-18">15-18 years</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Max Price (₪)</label>
+                        <input type="number" id="priceInput" placeholder="300" max="500" onchange="filterActivities()">
+                    </div>
+                </div>
+            </div>
+
+            <div id="activitiesContainer" class="activities-grid">
+                <!-- Activities populated by JS -->
+            </div>
+        </div>
+
+        <!-- PROVIDER VIEW -->
+        <div id="provider" class="tabs-content">
+            <div class="provider-dashboard">
+                <!-- Sidebar Navigation -->
+                <div class="sidebar">
+                    <div class="sidebar-section">
+                        <div class="sidebar-title">Navigation</div>
+                        <div class="sidebar-item active" onclick="switchProviderView('listings')">📋 My Listings</div>
+                        <div class="sidebar-item" onclick="switchProviderView('bookings')">📅 Bookings</div>
+                        <div class="sidebar-item" onclick="switchProviderView('messages')">💬 Messages</div>
+                        <div class="sidebar-item" onclick="switchProviderView('stats')">📊 Analytics</div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <div class="sidebar-title">Plan</div>
+                        <div style="font-size: 13px; color: var(--color-text-light); line-height: 1.8;">
+                            <strong>Current: Free Tier</strong><br>
+                            Upgrade to Standard (₪50/mo) or Premium (₪100/mo) for more visibility
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <div class="sidebar-title">Account</div>
+                        <div class="sidebar-item">⚙️ Settings</div>
+                        <div class="sidebar-item">🔐 Billing</div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="main-panel">
+                    <!-- Listings View -->
+                    <div id="listings-view">
+                        <h2 class="section-title">My Listings</h2>
+                        <div style="margin-bottom: var(--spacing-lg);">
+                            <button class="btn-primary" onclick="toggleForm('new-activity')">+ Add New Activity</button>
+                        </div>
+
+                        <div id="new-activity-form" style="display: none; background: var(--color-secondary); padding: var(--spacing-lg); border-radius: 8px; margin-bottom: var(--spacing-lg);">
+                            <h3 style="margin-bottom: var(--spacing-md);">New Activity</h3>
+                            <div class="form-group">
+                                <label>Activity Name</label>
+                                <input type="text" placeholder="e.g., Football Training for Kids">
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select>
+                                    <option>Sports</option>
+                                    <option>Arts & Crafts</option>
+                                    <option>Music</option>
+                                    <option>Dance</option>
+                                    <option>Academic</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Price per Session (₪)</label>
+                                <input type="number" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea placeholder="Tell parents about your activity..."></textarea>
+                            </div>
+                            <div style="display: flex; gap: var(--spacing-md);">
+                                <button class="btn-primary">Save Activity</button>
+                                <button class="btn-secondary" onclick="toggleForm('new-activity')">Cancel</button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; gap: var(--spacing-md);">
+                            <div style="background: white; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                    <div>
+                                        <h3 style="margin-bottom: var(--spacing-xs);">⚽ Football Training</h3>
+                                        <p style="color: var(--color-text-light); font-size: 13px; margin: 0;">Ages 7-14 • Twice weekly • ₪150/session</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span class="status-badge status-confirmed">Active</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
+                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Edit</button>
+                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Manage Schedule</button>
+                                </div>
+                            </div>
+
+                            <div style="background: white; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                                    <div>
+                                        <h3 style="margin-bottom: var(--spacing-xs);">🎨 Art & Crafts Workshop</h3>
+                                        <p style="color: var(--color-text-light); font-size: 13px; margin: 0;">Ages 5-10 • Weekly • ₪120/session</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span class="status-badge status-confirmed">Active</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
+                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Edit</button>
+                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Manage Schedule</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bookings View -->
+                    <div id="bookings-view" style="display: none;">
+                        <h2 class="section-title">Recent Bookings</h2>
+                        <div style="overflow-x: auto;">
+                            <table class="bookings-table">
+                                <thead>
+                                    <tr>
+                                        <th>Activity</th>
+                                        <th>Student</th>
+                                        <th>Date</th>
+                                        <th>Parent</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>⚽ Football Training</td>
+                                        <td>Liam Cohen</td>
+                                        <td>Jan 5, 2025</td>
+                                        <td>Rachel Cohen</td>
+                                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>🎨 Art Workshop</td>
+                                        <td>Mira Levi</td>
+                                        <td>Jan 6, 2025</td>
+                                        <td>David Levi</td>
+                                        <td><span class="status-badge status-pending">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>⚽ Football Training</td>
+                                        <td>Yosef Brown</td>
+                                        <td>Jan 12, 2025</td>
+                                        <td>Sarah Brown</td>
+                                        <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Messages View -->
+                    <div id="messages-view" style="display: none;">
+                        <h2 class="section-title">Messages</h2>
+                        <div class="messaging-box">
+                            <div class="message-preview">
+                                <div>
+                                    <div class="message-sender">Rachel Cohen</div>
+                                    <div class="message-text">Hi! Can my son join the football training on Sundays?</div>
+                                </div>
+                                <div style="color: var(--color-text-light); font-size: 12px;">5m ago</div>
+                            </div>
+                            <div class="message-preview">
+                                <div>
+                                    <div class="message-sender">David Levi</div>
+                                    <div class="message-text">How long are the art workshops?</div>
+                                </div>
+                                <div style="color: var(--color-text-light); font-size: 12px;">2h ago</div>
+                            </div>
+                            <div class="message-preview">
+                                <div>
+                                    <div class="message-sender">Sarah Brown</div>
+                                    <div class="message-text">Thank you so much! Yosef loved the class</div>
+                                </div>
+                                <div style="color: var(--color-text-light); font-size: 12px;">Yesterday</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics View -->
+                    <div id="stats-view" style="display: none;">
+                        <h2 class="section-title">Analytics Dashboard</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">847</div>
+                                <div class="stat-label">Profile Views</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">23</div>
+                                <div class="stat-label">Bookings This Month</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">₪2,450</div>
+                                <div class="stat-label">Revenue</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">4.8★</div>
+                                <div class="stat-label">Avg Rating</div>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 16px; font-weight: 600; margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Plan Benefits</h3>
+                        <div class="pricing-section">
+                            <div class="pricing-tiers">
+                                <div class="tier-card">
+                                    <div class="tier-name">Free</div>
+                                    <div class="tier-price">₪0</div>
+                                    <div class="tier-features">
+                                        ✓ Basic listing<br>
+                                        ✓ 4 photos<br>
+                                        ✓ No promotions<br>
+                                        ✓ Limited support
+                                    </div>
+                                    <button class="btn-secondary" style="width: 100%;">Current Plan</button>
+                                </div>
+                                <div class="tier-card">
+                                    <div class="tier-name">Standard</div>
+                                    <div class="tier-price">₪50<span style="font-size: 12px; color: var(--color-text-light);">/mo</span></div>
+                                    <div class="tier-features">
+                                        ✓ All Free features<br>
+                                        ✓ More photos<br>
+                                        ✓ Top search placement<br>
+                                        ✓ Schedule management
+                                    </div>
+                                    <button class="btn-primary" style="width: 100%;">Upgrade</button>
+                                </div>
+                                <div class="tier-card">
+                                    <div class="tier-name">Premium</div>
+                                    <div class="tier-price">₪100<span style="font-size: 12px; color: var(--color-text-light);">/mo</span></div>
+                                    <div class="tier-features">
+                                        ✓ All Standard features<br>
+                                        ✓ Unlimited photos<br>
+                                        ✓ Featured placement<br>
+                                        ✓ Marketing tools<br>
+                                        ✓ Priority support
+                                    </div>
+                                    <button class="btn-primary" style="width: 100%;">Upgrade</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock activity data
+        const activities = [
+            {
+                id: 1,
+                name: "Football Training",
+                provider: "Elite Sports Academy",
+                category: "sports",
+                age: "7-14",
+                location: "Bet Shemesh",
+                price: 150,
+                emoji: "⚽",
+                description: "Professional football coaching twice weekly"
+            },
+            {
+                id: 2,
+                name: "Art & Crafts Workshop",
+                provider: "Creative Kids Studio",
+                category: "arts",
+                age: "5-10",
+                location: "Bet Shemesh",
+                price: 120,
+                emoji: "🎨",
+                description: "Hands-on art projects and creative expression"
+            },
+            {
+                id: 3,
+                name: "Piano Lessons",
+                provider: "Music Academy",
+                category: "music",
+                age: "6-15",
+                location: "Bet Shemesh",
+                price: 200,
+                emoji: "🎹",
+                description: "Classical piano instruction for all levels"
+            },
+            {
+                id: 4,
+                name: "Ballet Classes",
+                provider: "Dance Studio Haifa",
+                category: "dance",
+                age: "4-12",
+                location: "Nearby",
+                price: 130,
+                emoji: "🩰",
+                description: "Classical ballet training for young dancers"
+            },
+            {
+                id: 5,
+                name: "Math Tutoring",
+                provider: "Academic Excellence",
+                category: "academic",
+                age: "7-13",
+                location: "Bet Shemesh",
+                price: 180,
+                emoji: "🧮",
+                description: "Personalized math tutoring for all grades"
+            },
+            {
+                id: 6,
+                name: "Chess Club",
+                provider: "Strategic Mind Institute",
+                category: "enrichment",
+                age: "6-16",
+                location: "Bet Shemesh",
+                price: 100,
+                emoji: "♟️",
+                description: "Learn chess strategy and compete with peers"
+            }
+        ];
+
+        function switchView(view) {
+            // Hide all tabs
+            document.getElementById('parent').classList.remove('active');
+            document.getElementById('provider').classList.remove('active');
+
+            // Show selected tab
+            document.getElementById(view).classList.add('active');
+
+            // Update button states
+            document.querySelectorAll('.user-toggle .tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (view === 'parent') {
+                renderActivities(activities);
+            }
+        }
+
+        function renderActivities(data) {
+            const container = document.getElementById('activitiesContainer');
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-light);">No activities found matching your criteria.</p>';
+                return;
+            }
+
+            data.forEach(activity => {
+                const card = document.createElement('div');
+                card.className = 'activity-card';
+                card.innerHTML = `
+                    <div class="card-image">${activity.emoji}</div>
+                    <div class="card-content">
+                        <span class="card-category">${activity.category.toUpperCase()}</span>
+                        <h3 class="card-title">${activity.name}</h3>
+                        <p class="card-provider">${activity.provider}</p>
+                        <p class="card-location">📍 ${activity.location}</p>
+                        <p class="card-price">₪${activity.price} per session</p>
+                        <div class="card-actions">
+                            <button class="btn-primary" onclick="alert('Booked! Check your email for confirmation')">Book</button>
+                            <button class="btn-secondary" onclick="alert('Message sent to ${activity.provider}')">Message</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterActivities() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categorySelect').value;
+            const age = document.getElementById('ageSelect').value;
+            const maxPrice = document.getElementById('priceInput').value;
+
+            const filtered = activities.filter(activity => {
+                const matchesSearch = activity.name.toLowerCase().includes(searchTerm) ||
+                                    activity.provider.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || activity.category === category;
+                const matchesAge = !age || activity.age.includes(age.split('-')[0]);
+                const matchesPrice = !maxPrice || activity.price <= parseInt(maxPrice);
+
+                return matchesSearch && matchesCategory && matchesAge && matchesPrice;
+            });
+
+            renderActivities(filtered);
+        }
+
+        function switchProviderView(view) {
+            // Hide all provider views
+            document.querySelectorAll('[id$="-view"]').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Show selected view
+            document.getElementById(view + '-view').style.display = 'block';
+
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function toggleForm(formId) {
+            const form = document.getElementById(formId);
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Initialize with parent view
+        document.getElementById('searchInput').addEventListener('keyup', filterActivities);
+        renderActivities(activities);
+    </script>
+</body>
+</html>
