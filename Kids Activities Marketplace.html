@@ -126,7 +126,8 @@
 
         input[type="text"],
         input[type="number"],
-        select {
+        select,
+        textarea {
             padding: var(--spacing-sm);
             border: 1px solid var(--color-border);
             border-radius: 4px;
@@ -136,10 +137,34 @@
 
         input[type="text"]:focus,
         input[type="number"]:focus,
-        select:focus {
+        select:focus,
+        textarea:focus {
             outline: none;
             border-color: var(--color-primary);
             box-shadow: 0 0 0 2px rgba(33, 128, 160, 0.1);
+        }
+
+        input:invalid:not(:placeholder-shown),
+        select:invalid:not([value=""]),
+        textarea:invalid:not(:placeholder-shown) {
+            border-color: var(--color-error);
+        }
+
+        .error-message {
+            color: var(--color-error);
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-group.has-error .error-message {
+            display: block;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select,
+        .form-group.has-error textarea {
+            border-color: var(--color-error);
         }
 
         .activities-grid {
@@ -478,6 +503,101 @@
             text-overflow: ellipsis;
         }
 
+        /* Utility classes for common inline styles */
+        .plan-info {
+            font-size: 13px;
+            color: var(--color-text-light);
+            line-height: 1.8;
+        }
+
+        .mb-lg {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .new-activity-form {
+            display: none;
+            background: var(--color-secondary);
+            padding: var(--spacing-lg);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .new-activity-form.visible {
+            display: block;
+        }
+
+        .form-title {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .listing-grid {
+            display: grid;
+            gap: var(--spacing-md);
+        }
+
+        .listing-card {
+            background: white;
+            padding: var(--spacing-md);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+        }
+
+        .listing-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .listing-title {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .listing-details {
+            color: var(--color-text-light);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .listing-status {
+            text-align: right;
+        }
+
+        .listing-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .listing-actions button {
+            flex: 1;
+            padding: 8px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .message-time {
+            color: var(--color-text-light);
+            font-size: 12px;
+        }
+
+        .subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .provider-view {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .provider-dashboard {
                 grid-template-columns: 1fr;
@@ -515,8 +635,8 @@
         <div class="header-content">
             <div class="logo">🎓 Kids Activities</div>
             <div class="user-toggle">
-                <button class="tab-button active" onclick="switchView('parent')">👨‍👩‍👧 Parent</button>
-                <button class="tab-button" onclick="switchView('provider')">🏢 Provider</button>
+                <button class="tab-button active" onclick="switchView('parent', this)">👨‍👩‍👧 Parent</button>
+                <button class="tab-button" onclick="switchView('provider', this)">🏢 Provider</button>
             </div>
         </div>
     </header>
@@ -524,14 +644,14 @@
     <div class="container">
         <!-- PARENT VIEW -->
         <div id="parent" class="tabs-content active">
-            <div class="search-filters">
+            <div class="search-filters" role="search" aria-label="Filter activities">
                 <div class="filters-grid">
                     <div class="filter-group">
-                        <label class="filter-label">Search</label>
-                        <input type="text" id="searchInput" placeholder="Activity name...">
+                        <label class="filter-label" for="searchInput">Search</label>
+                        <input type="text" id="searchInput" placeholder="Activity name..." aria-describedby="search-hint">
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Category</label>
+                        <label class="filter-label" for="categorySelect">Category</label>
                         <select id="categorySelect" onchange="filterActivities()">
                             <option value="">All Categories</option>
                             <option value="sports">Sports</option>
@@ -543,7 +663,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Age Group</label>
+                        <label class="filter-label" for="ageSelect">Age Group</label>
                         <select id="ageSelect" onchange="filterActivities()">
                             <option value="">All Ages</option>
                             <option value="3-6">3-6 years</option>
@@ -553,13 +673,13 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Max Price (₪)</label>
-                        <input type="number" id="priceInput" placeholder="300" max="500" onchange="filterActivities()">
+                        <label class="filter-label" for="priceInput">Max Price (₪)</label>
+                        <input type="number" id="priceInput" placeholder="300" max="500" min="0" onchange="filterActivities()">
                     </div>
                 </div>
             </div>
 
-            <div id="activitiesContainer" class="activities-grid">
+            <div id="activitiesContainer" class="activities-grid" role="list" aria-label="Available activities">
                 <!-- Activities populated by JS -->
             </div>
         </div>
@@ -568,18 +688,18 @@
         <div id="provider" class="tabs-content">
             <div class="provider-dashboard">
                 <!-- Sidebar Navigation -->
-                <div class="sidebar">
+                <nav class="sidebar" aria-label="Provider dashboard navigation">
                     <div class="sidebar-section">
-                        <div class="sidebar-title">Navigation</div>
-                        <div class="sidebar-item active" onclick="switchProviderView('listings')">📋 My Listings</div>
-                        <div class="sidebar-item" onclick="switchProviderView('bookings')">📅 Bookings</div>
-                        <div class="sidebar-item" onclick="switchProviderView('messages')">💬 Messages</div>
-                        <div class="sidebar-item" onclick="switchProviderView('stats')">📊 Analytics</div>
+                        <div class="sidebar-title" id="nav-title">Navigation</div>
+                        <div class="sidebar-item active" role="button" tabindex="0" onclick="switchProviderView('listings', this)" onkeypress="if(event.key==='Enter') switchProviderView('listings', this)">📋 My Listings</div>
+                        <div class="sidebar-item" role="button" tabindex="0" onclick="switchProviderView('bookings', this)" onkeypress="if(event.key==='Enter') switchProviderView('bookings', this)">📅 Bookings</div>
+                        <div class="sidebar-item" role="button" tabindex="0" onclick="switchProviderView('messages', this)" onkeypress="if(event.key==='Enter') switchProviderView('messages', this)">💬 Messages</div>
+                        <div class="sidebar-item" role="button" tabindex="0" onclick="switchProviderView('stats', this)" onkeypress="if(event.key==='Enter') switchProviderView('stats', this)">📊 Analytics</div>
                     </div>
 
                     <div class="sidebar-section">
                         <div class="sidebar-title">Plan</div>
-                        <div style="font-size: 13px; color: var(--color-text-light); line-height: 1.8;">
+                        <div class="plan-info">
                             <strong>Current: Free Tier</strong><br>
                             Upgrade to Standard (₪50/mo) or Premium (₪100/mo) for more visibility
                         </div>
@@ -587,89 +707,90 @@
 
                     <div class="sidebar-section">
                         <div class="sidebar-title">Account</div>
-                        <div class="sidebar-item">⚙️ Settings</div>
-                        <div class="sidebar-item">🔐 Billing</div>
+                        <div class="sidebar-item" role="button" tabindex="0">⚙️ Settings</div>
+                        <div class="sidebar-item" role="button" tabindex="0">🔐 Billing</div>
                     </div>
-                </div>
+                </nav>
 
                 <!-- Main Content -->
                 <div class="main-panel">
                     <!-- Listings View -->
                     <div id="listings-view">
                         <h2 class="section-title">My Listings</h2>
-                        <div style="margin-bottom: var(--spacing-lg);">
-                            <button class="btn-primary" onclick="toggleForm('new-activity')">+ Add New Activity</button>
+                        <div class="mb-lg">
+                            <button class="btn-primary" onclick="toggleForm('new-activity-form')">+ Add New Activity</button>
                         </div>
 
-                        <div id="new-activity-form" style="display: none; background: var(--color-secondary); padding: var(--spacing-lg); border-radius: 8px; margin-bottom: var(--spacing-lg);">
-                            <h3 style="margin-bottom: var(--spacing-md);">New Activity</h3>
+                        <div id="new-activity-form" class="new-activity-form" role="form" aria-labelledby="new-activity-title">
+                            <h3 id="new-activity-title" class="form-title">New Activity</h3>
                             <div class="form-group">
-                                <label>Activity Name</label>
-                                <input type="text" placeholder="e.g., Football Training for Kids">
+                                <label for="activity-name">Activity Name</label>
+                                <input type="text" id="activity-name" placeholder="e.g., Football Training for Kids" required>
                             </div>
                             <div class="form-group">
-                                <label>Category</label>
-                                <select>
-                                    <option>Sports</option>
-                                    <option>Arts & Crafts</option>
-                                    <option>Music</option>
-                                    <option>Dance</option>
-                                    <option>Academic</option>
+                                <label for="activity-category">Category</label>
+                                <select id="activity-category" required>
+                                    <option value="">Select a category</option>
+                                    <option value="sports">Sports</option>
+                                    <option value="arts">Arts & Crafts</option>
+                                    <option value="music">Music</option>
+                                    <option value="dance">Dance</option>
+                                    <option value="academic">Academic</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Price per Session (₪)</label>
-                                <input type="number" placeholder="100">
+                                <label for="activity-price">Price per Session (₪)</label>
+                                <input type="number" id="activity-price" placeholder="100" min="0" required>
                             </div>
                             <div class="form-group">
-                                <label>Description</label>
-                                <textarea placeholder="Tell parents about your activity..."></textarea>
+                                <label for="activity-description">Description</label>
+                                <textarea id="activity-description" placeholder="Tell parents about your activity..." required></textarea>
                             </div>
-                            <div style="display: flex; gap: var(--spacing-md);">
-                                <button class="btn-primary">Save Activity</button>
-                                <button class="btn-secondary" onclick="toggleForm('new-activity')">Cancel</button>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Save Activity</button>
+                                <button type="button" class="btn-secondary" onclick="toggleForm('new-activity-form')">Cancel</button>
                             </div>
                         </div>
 
-                        <div style="display: grid; gap: var(--spacing-md);">
-                            <div style="background: white; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                        <div class="listing-grid">
+                            <div class="listing-card">
+                                <div class="listing-header">
                                     <div>
-                                        <h3 style="margin-bottom: var(--spacing-xs);">⚽ Football Training</h3>
-                                        <p style="color: var(--color-text-light); font-size: 13px; margin: 0;">Ages 7-14 • Twice weekly • ₪150/session</p>
+                                        <h3 class="listing-title">⚽ Football Training</h3>
+                                        <p class="listing-details">Ages 7-14 • Twice weekly • ₪150/session</p>
                                     </div>
-                                    <div style="text-align: right;">
+                                    <div class="listing-status">
                                         <span class="status-badge status-confirmed">Active</span>
                                     </div>
                                 </div>
-                                <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
-                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Edit</button>
-                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Manage Schedule</button>
+                                <div class="listing-actions">
+                                    <button class="btn-secondary">Edit</button>
+                                    <button class="btn-secondary">Manage Schedule</button>
                                 </div>
                             </div>
 
-                            <div style="background: white; padding: var(--spacing-md); border: 1px solid var(--color-border); border-radius: 8px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: var(--spacing-sm);">
+                            <div class="listing-card">
+                                <div class="listing-header">
                                     <div>
-                                        <h3 style="margin-bottom: var(--spacing-xs);">🎨 Art & Crafts Workshop</h3>
-                                        <p style="color: var(--color-text-light); font-size: 13px; margin: 0;">Ages 5-10 • Weekly • ₪120/session</p>
+                                        <h3 class="listing-title">🎨 Art & Crafts Workshop</h3>
+                                        <p class="listing-details">Ages 5-10 • Weekly • ₪120/session</p>
                                     </div>
-                                    <div style="text-align: right;">
+                                    <div class="listing-status">
                                         <span class="status-badge status-confirmed">Active</span>
                                     </div>
                                 </div>
-                                <div style="display: flex; gap: var(--spacing-sm); margin-top: var(--spacing-sm);">
-                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Edit</button>
-                                    <button class="btn-secondary" style="flex: 1; padding: 8px;">Manage Schedule</button>
+                                <div class="listing-actions">
+                                    <button class="btn-secondary">Edit</button>
+                                    <button class="btn-secondary">Manage Schedule</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Bookings View -->
-                    <div id="bookings-view" style="display: none;">
+                    <div id="bookings-view" class="provider-view">
                         <h2 class="section-title">Recent Bookings</h2>
-                        <div style="overflow-x: auto;">
+                        <div class="table-wrapper">
                             <table class="bookings-table">
                                 <thead>
                                     <tr>
@@ -708,7 +829,7 @@
                     </div>
 
                     <!-- Messages View -->
-                    <div id="messages-view" style="display: none;">
+                    <div id="messages-view" class="provider-view">
                         <h2 class="section-title">Messages</h2>
                         <div class="messaging-box">
                             <div class="message-preview">
@@ -716,27 +837,27 @@
                                     <div class="message-sender">Rachel Cohen</div>
                                     <div class="message-text">Hi! Can my son join the football training on Sundays?</div>
                                 </div>
-                                <div style="color: var(--color-text-light); font-size: 12px;">5m ago</div>
+                                <div class="message-time">5m ago</div>
                             </div>
                             <div class="message-preview">
                                 <div>
                                     <div class="message-sender">David Levi</div>
                                     <div class="message-text">How long are the art workshops?</div>
                                 </div>
-                                <div style="color: var(--color-text-light); font-size: 12px;">2h ago</div>
+                                <div class="message-time">2h ago</div>
                             </div>
                             <div class="message-preview">
                                 <div>
                                     <div class="message-sender">Sarah Brown</div>
                                     <div class="message-text">Thank you so much! Yosef loved the class</div>
                                 </div>
-                                <div style="color: var(--color-text-light); font-size: 12px;">Yesterday</div>
+                                <div class="message-time">Yesterday</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Analytics View -->
-                    <div id="stats-view" style="display: none;">
+                    <div id="stats-view" class="provider-view">
                         <h2 class="section-title">Analytics Dashboard</h2>
                         <div class="stats-grid">
                             <div class="stat-card">
@@ -757,7 +878,7 @@
                             </div>
                         </div>
 
-                        <h3 style="font-size: 16px; font-weight: 600; margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Plan Benefits</h3>
+                        <h3 class="subsection-title">Plan Benefits</h3>
                         <div class="pricing-section">
                             <div class="pricing-tiers">
                                 <div class="tier-card">
@@ -873,19 +994,30 @@
             }
         ];
 
-        function switchView(view) {
+        function switchView(view, element) {
+            const parentView = document.getElementById('parent');
+            const providerView = document.getElementById('provider');
+            const targetView = document.getElementById(view);
+
+            if (!parentView || !providerView || !targetView) {
+                console.error('View elements not found');
+                return;
+            }
+
             // Hide all tabs
-            document.getElementById('parent').classList.remove('active');
-            document.getElementById('provider').classList.remove('active');
+            parentView.classList.remove('active');
+            providerView.classList.remove('active');
 
             // Show selected tab
-            document.getElementById(view).classList.add('active');
+            targetView.classList.add('active');
 
             // Update button states
             document.querySelectorAll('.user-toggle .tab-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            }
 
             if (view === 'parent') {
                 renderActivities(activities);
@@ -897,24 +1029,25 @@
             container.innerHTML = '';
 
             if (data.length === 0) {
-                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-light);">No activities found matching your criteria.</p>';
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-light);" role="status">No activities found matching your criteria.</p>';
                 return;
             }
 
             data.forEach(activity => {
-                const card = document.createElement('div');
+                const card = document.createElement('article');
                 card.className = 'activity-card';
+                card.setAttribute('role', 'listitem');
                 card.innerHTML = `
-                    <div class="card-image">${activity.emoji}</div>
+                    <div class="card-image" aria-hidden="true">${activity.emoji}</div>
                     <div class="card-content">
                         <span class="card-category">${activity.category.toUpperCase()}</span>
                         <h3 class="card-title">${activity.name}</h3>
                         <p class="card-provider">${activity.provider}</p>
-                        <p class="card-location">📍 ${activity.location}</p>
+                        <p class="card-location"><span aria-label="Location">📍</span> ${activity.location}</p>
                         <p class="card-price">₪${activity.price} per session</p>
                         <div class="card-actions">
-                            <button class="btn-primary" onclick="alert('Booked! Check your email for confirmation')">Book</button>
-                            <button class="btn-secondary" onclick="alert('Message sent to ${activity.provider}')">Message</button>
+                            <button class="btn-primary" onclick="alert('Booked! Check your email for confirmation')" aria-label="Book ${activity.name}">Book</button>
+                            <button class="btn-secondary" onclick="alert('Message sent to ${activity.provider}')" aria-label="Message ${activity.provider}">Message</button>
                         </div>
                     </div>
                 `;
@@ -941,30 +1074,102 @@
             renderActivities(filtered);
         }
 
-        function switchProviderView(view) {
+        function switchProviderView(view, element) {
+            const listingsView = document.getElementById('listings-view');
+            const targetView = document.getElementById(view + '-view');
+
+            if (!targetView) {
+                console.error('Target view not found:', view + '-view');
+                return;
+            }
+
             // Hide all provider views
-            document.querySelectorAll('[id$="-view"]').forEach(el => {
+            document.querySelectorAll('.provider-view').forEach(el => {
                 el.style.display = 'none';
             });
+            // Hide listings view (not a provider-view class)
+            if (listingsView) {
+                listingsView.style.display = 'none';
+            }
 
             // Show selected view
-            document.getElementById(view + '-view').style.display = 'block';
+            targetView.style.display = 'block';
 
             // Update sidebar active state
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (element) {
+                element.classList.add('active');
+            }
         }
 
         function toggleForm(formId) {
             const form = document.getElementById(formId);
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form) {
+                form.classList.toggle('visible');
+            }
+        }
+
+        function validateForm(formElement) {
+            let isValid = true;
+            const inputs = formElement.querySelectorAll('input[required], select[required], textarea[required]');
+
+            inputs.forEach(input => {
+                const formGroup = input.closest('.form-group');
+                if (!input.value.trim()) {
+                    isValid = false;
+                    if (formGroup) {
+                        formGroup.classList.add('has-error');
+                    }
+                } else {
+                    if (formGroup) {
+                        formGroup.classList.remove('has-error');
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+        function handleActivitySubmit(event) {
+            event.preventDefault();
+            const form = document.getElementById('new-activity-form');
+
+            if (validateForm(form)) {
+                const name = document.getElementById('activity-name').value;
+                const category = document.getElementById('activity-category').value;
+                const price = document.getElementById('activity-price').value;
+                const description = document.getElementById('activity-description').value;
+
+                alert(`Activity "${name}" saved successfully!`);
+
+                // Reset form and close
+                form.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.type !== 'submit' && input.type !== 'button') {
+                        input.value = '';
+                    }
+                });
+                toggleForm('new-activity-form');
+            } else {
+                alert('Please fill in all required fields.');
+            }
         }
 
         // Initialize with parent view
-        document.getElementById('searchInput').addEventListener('keyup', filterActivities);
-        renderActivities(activities);
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', filterActivities);
+            }
+
+            const saveButton = document.querySelector('#new-activity-form .btn-primary');
+            if (saveButton) {
+                saveButton.addEventListener('click', handleActivitySubmit);
+            }
+
+            renderActivities(activities);
+        });
     </script>
 </body>
 </html>
